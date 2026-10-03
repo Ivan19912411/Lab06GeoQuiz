@@ -14,6 +14,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lab06geoquiz.ui.theme.Lab06GeoQuizTheme
+import kotlinx.coroutines.launch
 
 
 data class Question(val text: String, val answer: Boolean)
@@ -34,8 +35,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Lab06GeoQuizTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    QuizScreen(modifier = Modifier.padding(innerPadding))
+                val snackbarHostState = remember { SnackbarHostState() }
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                ) { innerPadding ->
+                    QuizScreen(
+                        snackbarHostState = snackbarHostState,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -44,12 +53,34 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun QuizScreen(modifier: Modifier = Modifier) {
+fun QuizScreen(
+    snackbarHostState: SnackbarHostState,
+    modifier: Modifier = Modifier
+) {
     var currentIndex by remember { mutableIntStateOf(0) }
+    var score by remember { mutableIntStateOf(0) }
     var answered by remember { mutableStateOf(false) }
 
+    val scope = rememberCoroutineScope()
     val currentQuestion = questionList[currentIndex]
     val isLastQuestion = currentIndex == questionList.lastIndex
+
+    fun handleAnswer(userAnswer: Boolean) {
+        if (userAnswer == currentQuestion.answer) {
+            score++
+        }
+        answered = true
+
+
+        if (isLastQuestion) {
+            val finalScore = if (userAnswer == currentQuestion.answer) score else score
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    "Правильных ответов: $finalScore из ${questionList.size}"
+                )
+            }
+        }
+    }
 
     Column(
         modifier = modifier
@@ -75,24 +106,18 @@ fun QuizScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(32.dp))
 
         if (!answered) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = {
-                    answered = true
-                }) {
+                Button(onClick = { handleAnswer(true) }) {
                     Text("True")
                 }
-                Button(onClick = {
-                    answered = true
-                }) {
+                Button(onClick = { handleAnswer(false) }) {
                     Text("False")
                 }
             }
         } else {
-
             if (!isLastQuestion) {
                 Button(onClick = {
                     currentIndex++
