@@ -49,6 +49,7 @@ fun QuizScreen(modifier: Modifier = Modifier) {
     var answered by remember { mutableStateOf(false) }
 
     val currentQuestion = questionList[currentIndex]
+    val isLastQuestion = currentIndex == questionList.lastIndex
 
     Column(
         modifier = modifier
@@ -74,21 +75,30 @@ fun QuizScreen(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(32.dp))
 
         if (!answered) {
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(onClick = {
-                    // Логика ответа "True"
                     answered = true
                 }) {
                     Text("True")
                 }
                 Button(onClick = {
-                    // Логика ответа "False"
                     answered = true
                 }) {
                     Text("False")
+                }
+            }
+        } else {
+
+            if (!isLastQuestion) {
+                Button(onClick = {
+                    currentIndex++
+                    answered = false
+                }) {
+                    Text("Next")
                 }
             }
         }
