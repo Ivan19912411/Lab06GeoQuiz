@@ -11,11 +11,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lab06geoquiz.ui.theme.Lab06GeoQuizTheme
 import kotlinx.coroutines.launch
 
+// ==================== ДАННЫЕ ====================
 
 data class Question(val text: String, val answer: Boolean)
 
@@ -28,6 +30,7 @@ val questionList = listOf(
     Question("Lake Baikal is the world's oldest and deepest freshwater lake.", true)
 )
 
+// ==================== ACTIVITY ====================
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,6 +54,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// ==================== UI ====================
 
 @Composable
 fun QuizScreen(
@@ -70,7 +74,6 @@ fun QuizScreen(
             score++
         }
         answered = true
-
 
         if (isLastQuestion) {
             val finalScore = if (userAnswer == currentQuestion.answer) score else score
@@ -126,6 +129,23 @@ fun QuizScreen(
                     Text("Next")
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun QuizScreenPreview() {
+    Lab06GeoQuizTheme {
+        val snackbarHostState = remember { SnackbarHostState() }
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { innerPadding ->
+            QuizScreen(
+                snackbarHostState = snackbarHostState,
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }
